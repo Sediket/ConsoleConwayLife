@@ -119,12 +119,18 @@ namespace ConsoleConwayLife
             }
 
             oldBoard[38].life = 1;
+            oldBoard[38].color = "#ff34a4";
             oldBoard[39].life = 1;
+            oldBoard[39].color = "#00ffa4";
             oldBoard[40].life = 1;
+            oldBoard[40].color = "#ffffa4";
 
             oldBoard[41].life = 1;
+            oldBoard[41].color = "#ff0012";
             oldBoard[60].life = 1;
+            oldBoard[60].color = "#abff12";
             oldBoard[79].life = 1;
+            oldBoard[79].color = "#0000ff";
 
 
 
@@ -179,8 +185,29 @@ namespace ConsoleConwayLife
                         x++;
                     }
                 }
-              /////////////////
-            
+            /////////////////
+
+            x = 19;
+            while (x < (18 * 17))
+            {
+                if (x % 18 == 0)
+                {
+                    x++;
+                }
+                else if (x % 18 == 17)
+                {
+                    Console.Write("\n");
+                    x++;
+                }
+                else
+                {
+                    Console.Write(newBoard[x].color);
+                    //Console.Write(x);
+                    ///check cell
+                    x++;
+                }
+            }
+
 
             ///receive board in json
             ///deserialize the board from json
@@ -192,59 +219,86 @@ namespace ConsoleConwayLife
         }
 
 
-        ///receive board, and index of cell return count of horizontal live cells
-        public static int horCheck(cell[] board, int i)
+        public static string avgHexColor(string v1, string v2)
         {
+            int red = int.Parse(v1.Substring(1, 2), System.Globalization.NumberStyles.HexNumber);
+            int green = int.Parse(v1.Substring(3, 2), System.Globalization.NumberStyles.HexNumber);
+            int blue = int.Parse(v1.Substring(5, 2), System.Globalization.NumberStyles.HexNumber);
+            string avgColor = "#" + (red / 2).ToString("X2") + (green / 2).ToString("X2") + (blue / 2).ToString("X2");
+            return avgColor;
+        }
 
+
+        ///receive board, and index of cell return count of horizontal live cells
+        public static string[] horCheck(cell[] board, int i)
+        {
             int count = 0;
+            string hexColor = board[i].color;
             if (board[i + 1].life == 1)
             {
                 count++;
+                hexColor = avgHexColor(board[i + 1].color, hexColor);
             }
             if (board[i - 1].life == 1)
             {
+                hexColor = avgHexColor(board[i + 1].color, hexColor);
                 count++;
             }
-            return count;
+            string[] retArr = { count.ToString(), hexColor };
+            return retArr;
         }
 
+
+
+
+
         ///return a count of how many vertical cells are live
-        public static int vertCheck(cell[] board, int i)
+        public static string[] vertCheck(cell[] board, int i)
         {
             int count = 0;
+            string hexColor = board[i].color;
             if (board[i + 18].life == 1)
             {
+                hexColor = avgHexColor(board[i + 18].color, hexColor);
                 count++;
             }
             if (board[i - 18].life == 1)
             {
+                hexColor = avgHexColor(board[i - 18].color, hexColor);
                 count++;
             }
-            return count;
+            string[] retArr = { count.ToString(), hexColor };
+            return retArr;
         }
 
         ///check if two cells are diagnoally adjacent
 
-        public static int diagCheck(cell[] board, int i)
+        public static string[] diagCheck(cell[] board, int i)
         {
             int count = 0;
+            string hexColor = board[i].color;
             if (board[i + 19].life == 1)
             {
+                hexColor = avgHexColor(board[i + 19].color, hexColor);
                 count++;
             }
             if (board[i + 17].life == 1)
             {
+                hexColor = avgHexColor(board[i + 17].color, hexColor);
                 count++;
             }
             if (board[i - 19].life == 1)
             {
+                hexColor = avgHexColor(board[i - 19].color, hexColor);
                 count++;
             }
             if (board[i - 17].life == 1)
             {
+                hexColor = avgHexColor(board[i - 17].color, hexColor);
                 count++;
             }
-            return count;
+            string[] retArr = { count.ToString(), hexColor };
+            return retArr;
         }
 
         ///game logic:
@@ -273,7 +327,23 @@ namespace ConsoleConwayLife
                     //2 Any dead cell with three live neighbors becomes a live cell.
                     //3 All other live cells die in the next generation.Similarly, all other dead cells stay dead
 
-                    int liveNeighbors = horCheck(board, x) + vertCheck(board, x) + diagCheck(board, x);
+                    string[] currArr = horCheck(board, x);
+                    int liveNeighbors = Int32.Parse(currArr[0]);
+                    string hexColor = currArr[1];
+
+                    currArr = vertCheck(board, x);
+                    liveNeighbors += Int32.Parse(currArr[0]);
+                    hexColor = avgHexColor(currArr[1], hexColor);
+
+                    currArr = diagCheck(board, x);
+                    liveNeighbors += Int32.Parse(currArr[0]);
+                    hexColor = avgHexColor(currArr[1], hexColor);
+
+
+                    //int liveNeighbors = horCheck(board, x) + vertCheck(board, x) + diagCheck(board, x);
+
+
+
                     if (board[x].life == 1)
                     {
                         //if live cell
@@ -282,6 +352,7 @@ namespace ConsoleConwayLife
                         {
                             //live cell stays alive
                             newBoard[x].life = 1;
+                            newBoard[x].color = hexColor;
                         }
                         else
                         {
@@ -296,6 +367,7 @@ namespace ConsoleConwayLife
                         {
                             //becomes alive
                             newBoard[x].life = 1;
+                            newBoard[x].color = hexColor;
                         }
                         else
                         {
